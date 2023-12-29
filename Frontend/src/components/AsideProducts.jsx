@@ -5,7 +5,7 @@ import { useProducts } from '../context/ProductsContext';
 export default function AsideProducts() {
   const [priceFrom, setPriceFrom] = useState('');
   const [priceTo, setPriceTo] = useState('');
-  const [category, setCategory] = useState('vitamine');
+  const [category, setCategory] = useState('vitamin');
 
   const { params, setParams } = useProducts();
 

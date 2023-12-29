@@ -108,7 +108,7 @@ button{
 }
 
 
-//------PRODUCTS-------
+//------з------
 
 .products{
     display: grid;
@@ -117,22 +117,28 @@ button{
 }
 
 .products-items{
-    display: flex;
-    flex-wrap: wrap;
-    justify-content:space-between;
-    row-gap: 3rem;
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    justify-items: center;
+    justify-content: space-between;
+    row-gap: 2rem;
 }
 
-.products-item{
+.products-item {
     max-width: 200px;
+    max-height: 280px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    border: 1px solid rgb(201, 201, 201);
+    padding: 1rem; 
+    border-radius: 4px;
+}
 
-    img{
-        max-width: 200px;
-        max-height: 200px;
-    }
+.products-item img {
+    max-width: 100%;
+    max-height: 100%; 
+
 }
 
 .product-btn{
@@ -150,7 +156,7 @@ button{
     background-color: #f5f5f5;
     padding: 20px;
     width: 80%; 
-    height: 500px;
+    height: 400px;
     border-radius: 4px;
 }
 
@@ -443,7 +449,7 @@ button{
     background-color: #f5f5f5;
     padding: 20px;
     width: 80%; 
-    height: 500px;
+    height: 400px;
     display: flex;
     align-items: center;
     flex-direction: column;
@@ -454,5 +460,14 @@ button{
         @include btns;
         width: 100%;
         height: 60px;
+    }
+}
+
+
+//---------MEDIA--------
+
+@media (max-width: 1320px) {
+    .products-items {
+        grid-template-columns: repeat(3, 1fr); 
     }
 }

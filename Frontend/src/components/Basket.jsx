@@ -54,6 +54,7 @@ export default function Basket() {
                 <div className="basket-item-text">
                   <p className='basket-item-title'>{item.name}</p>
                   <p>Price: {item.price} lei</p>
+                  <input type="number" value={item.quantity} />
                   <button onClick={() => handlerDelBasketItem(item.id)}>Delete</button>
                 </div>
               </div>

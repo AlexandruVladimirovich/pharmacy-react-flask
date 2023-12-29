@@ -176,8 +176,6 @@ def getnews():
 #---------ADD TO CART----------
 @app.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
-    data = request.get_json()
-
     token = request.headers.get('Authorization').encode('utf-8')
 
     try:
@@ -188,23 +186,28 @@ def add_to_cart():
     except jwt.InvalidTokenError:
         return jsonify({"error": "Invalid token"}), 401
 
-    product_id = data.get('product_id')
+    data = request.get_json()
+    product_id = data.get('product_id', None)
 
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM products WHERE id = %s", (product_id,))
-    product = cur.fetchone()
-    cur.close()
+    
+    # Check if the product is already in the user's cart
+    cur.execute("SELECT * FROM basket WHERE user_id = %s AND product_id = %s", (user_id, product_id))
+    existing_item = cur.fetchone()
 
-    if not product:
-        return jsonify({"error": "Product not found"}), 404
+    if existing_item:
+        # If the product is already in the cart, update the quantity
+        new_quantity = existing_item[3] + 1
+        cur.execute("UPDATE basket SET quantity = %s WHERE user_id = %s AND product_id = %s", (new_quantity, user_id, product_id))
+    else:
+        # If the product is not in the cart, add a new entry
+        cur.execute("INSERT INTO basket (user_id, product_id, quantity) VALUES (%s, %s, 1)", (user_id, product_id))
 
-    cur = mysql.connection.cursor()
-    cur.execute("INSERT INTO basket (user_id, product_id) VALUES (%s, %s)", (user_id, product_id))
     mysql.connection.commit()
     cur.close()
 
-    response = jsonify({"message": "Item added to cart successfully"})
-    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:5173')
+    return jsonify({"message": "Product added to the cart successfully"}), 200
+
     return response, 200
 
 
@@ -222,12 +225,12 @@ def get_cart_items():
         return jsonify({"error": "Invalid token"}), 401
 
     cur = mysql.connection.cursor()
-    cur.execute("SELECT basket.id, products.name, products.discription, products.price, products.img, products.category FROM basket JOIN products ON basket.product_id = products.id WHERE basket.user_id = %s", (user_id,))
+    cur.execute("SELECT basket.id, products.name, products.discription, products.price, products.img, products.category, basket.quantity FROM basket JOIN products ON basket.product_id = products.id WHERE basket.user_id = %s", (user_id,))
     cart_items = cur.fetchall()
     cur.close()
 
     cart_list = [
-        {'id': item[0], 'name': item[1], 'description': item[2], 'price': item[3], 'img': item[4], 'category': item[5]} 
+        {'id': item[0], 'name': item[1], 'description': item[2], 'price': item[3], 'img': item[4], 'category': item[5], 'quantity': item[6]} 
         for item in cart_items
     ]
 
