@@ -7,6 +7,7 @@ import { message, FloatButton } from 'antd';
 export default function Basket() {
   const { authToken } = useAuth();
   const [cartItems, setCartItems] = useState([]);
+  const [totalAmount, setTotalAmout] = useState('');
 
   useEffect(() => {
     fetchCartItems();
@@ -18,7 +19,8 @@ export default function Basket() {
     })
       .then(response => {
         console.log(response.data);
-        setCartItems(response.data);
+        setCartItems(response.data.cart_items);
+        setTotalAmout(response.data.total_amount);
       })
       .catch(error => {
         console.error(error);
@@ -72,7 +74,7 @@ export default function Basket() {
             <input type="text" placeholder='Promo' />
           </form>
             <div className="order-details_pay">
-              <p>Total amount: </p>
+              <p>Total amount: {totalAmount} </p>
               <p>Delivery price: </p>
               <button className='order-details_btn'>Pay</button>
             </div>

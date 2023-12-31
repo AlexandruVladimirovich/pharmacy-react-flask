@@ -191,16 +191,13 @@ def add_to_cart():
 
     cur = mysql.connection.cursor()
     
-    # Check if the product is already in the user's cart
     cur.execute("SELECT * FROM basket WHERE user_id = %s AND product_id = %s", (user_id, product_id))
     existing_item = cur.fetchone()
 
     if existing_item:
-        # If the product is already in the cart, update the quantity
         new_quantity = existing_item[3] + 1
         cur.execute("UPDATE basket SET quantity = %s WHERE user_id = %s AND product_id = %s", (new_quantity, user_id, product_id))
     else:
-        # If the product is not in the cart, add a new entry
         cur.execute("INSERT INTO basket (user_id, product_id, quantity) VALUES (%s, %s, 1)", (user_id, product_id))
 
     mysql.connection.commit()
@@ -225,16 +222,48 @@ def get_cart_items():
         return jsonify({"error": "Invalid token"}), 401
 
     cur = mysql.connection.cursor()
-    cur.execute("SELECT basket.id, products.name, products.discription, products.price, products.img, products.category, basket.quantity FROM basket JOIN products ON basket.product_id = products.id WHERE basket.user_id = %s", (user_id,))
+    cur.execute("""
+        SELECT 
+            basket.id, 
+            products.name, 
+            products.discription, 
+            products.price, 
+            products.img, 
+            products.category, 
+            basket.quantity,
+            products.price * basket.quantity AS total_price
+        FROM 
+            basket 
+        JOIN 
+            products ON basket.product_id = products.id 
+        WHERE 
+            basket.user_id = %s
+    """, (user_id,))
+    
     cart_items = cur.fetchall()
     cur.close()
 
-    cart_list = [
-        {'id': item[0], 'name': item[1], 'description': item[2], 'price': item[3], 'img': item[4], 'category': item[5], 'quantity': item[6]} 
+    formatted_cart_items = [
+        {
+            'id': item[0], 
+            'name': item[1], 
+            'description': item[2], 
+            'price': item[3], 
+            'img': item[4], 
+            'category': item[5], 
+            'quantity': item[6],
+            'total_price': str(item[7])
+        } 
         for item in cart_items
     ]
 
-    return jsonify(cart_list)
+    total_amount = sum(Decimal(item['total_price']) for item in formatted_cart_items)
+
+    response = {'cart_items': formatted_cart_items, 'total_amount': str(total_amount)}
+
+    return jsonify(response)
+
+
 
 
 
