@@ -22,6 +22,9 @@ export default function Header() {
       <Menu.Item key="2">
         <Link to="/UserOrders">User Orders</Link>
       </Menu.Item>
+      <Menu.Item key="3">
+        <Link to="/AddNews">Add News</Link>
+      </Menu.Item>
     </Menu>
   );
 

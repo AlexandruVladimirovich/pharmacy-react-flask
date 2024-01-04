@@ -154,6 +154,33 @@ export default function AdminPanel() {
       quantity: 0,
     });
   };
+
+  const selectItem = (selectedProduct) => {
+    setIsUpdateMode(true);
+  
+    if (selectedProduct) {
+      setNewProductData({
+        id: selectedProduct.id,
+        name: selectedProduct.name,
+        discription: selectedProduct.discription,
+        price: selectedProduct.price,
+        img: selectedProduct.img,
+        category: selectedProduct.category,
+        quantity: selectedProduct.quantity,
+      });
+    } else {
+      setNewProductData({
+        id: '',
+        name: '',
+        discription: '',
+        price: 0,
+        img: '',
+        category: '',
+        quantity: 0,
+      });
+    }
+  };
+  
   
 
   return (
@@ -219,7 +246,7 @@ export default function AdminPanel() {
 
       <div className="admin-panel_products">
         {products.map((item, index) => (
-          <div key={index} id={item.id} className="admin-panel_item" >
+          <div key={index} id={item.id} className="admin-panel_item" onClick={() => selectItem(item)}>
             <img src={item.img} alt="" />
             <p>ID: {item.id}</p>
             <p>Title: {item.name}</p>

@@ -25,6 +25,7 @@ body{
     font-size: 16px;
     font-family: 'Montserrat', sans-serif;
     overflow-y: scroll; 
+    padding-bottom: 1.5rem;
 }
 
 button{
@@ -34,6 +35,14 @@ button{
 .wrapper{
     width: 90%;
     margin: 0 auto;
+}
+
+.footer {
+    height: 50px;
+    background-color: #ededed;
+    text-align: center;
+    line-height: 50px;
+    width: 100%;
 }
 
 //------HEADER--------
@@ -225,20 +234,17 @@ button{
 .login-form{
     display: flex;
     flex-direction: column;
-    row-gap: 1.5rem;
+    row-gap: 1rem;
     width: 25%;
 
     .login-form_block{
         display: flex;
         flex-direction: column;
-        row-gap: 8px;
-        
-        p{
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            column-gap: 4px;
-        }
+        row-gap: 4px;
+    }
+
+    p{
+        cursor: pointer;
     }
 
     input{
@@ -369,6 +375,8 @@ button{
     font-weight: 700;
 }
 
+
+
 //-------ADMIN PANEL---------
 
 
@@ -414,6 +422,7 @@ button{
     border: 1px solid black;
     border-radius: 4px;
     padding-right: 8px;
+    cursor: pointer;
 
     img{
         width: 70px;

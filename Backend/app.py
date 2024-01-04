@@ -173,6 +173,41 @@ def getnews():
     return jsonify(news_list)
 
 
+#-----------ADD NEWS-----------
+
+@app.route('/add_news', methods=['POST'])
+def add_news():
+    data = request.get_json()
+
+    token = request.headers.get('Authorization').encode('utf-8')
+
+    try:
+        decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+        user_role = decoded_token.get('role', 'user')
+    except jwt.ExpiredSignatureError:
+        return jsonify({"error": "Token has expired"}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({"error": "Invalid token"}), 401
+
+    if user_role != 'admin':
+        return jsonify({"error": "Permission denied. Only admin can add news"}), 403
+
+    title = data.get('title')
+    description = data.get('text') 
+    img = data.get('imgLink')
+
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("INSERT INTO news (title, description, img) VALUES (%s, %s, %s)", (title, description, img))
+        mysql.connection.commit()
+        cur.close()
+
+        return jsonify({"message": "News added successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
 #---------ADD TO CART----------
 @app.route('/add_to_cart', methods=['POST'])
 def add_to_cart():

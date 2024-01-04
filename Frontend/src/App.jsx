@@ -6,7 +6,8 @@ import Products from './pages/Products';
 import Login from './pages/Login';
 import Basket from './components/Basket';
 import AdminPanel from './pages/AdminPanel';
-import Feedback from './pages/Feedback';
+import AddNews from './components/AddNews';
+import Footer from './components/Footer';
 import { AuthProvider } from './context/AuthContext';
 import { ProductsProvider } from './context/ProductsContext';
 import Account from './pages/Account';
@@ -25,8 +26,10 @@ function App() {
               <Route path="/Login" element={<Login />} />
               <Route path="/Basket" element={<Basket />} />
               <Route path="/AdminPanel" element={<AdminPanel />} />
+              <Route path='/AddNews' element={<AddNews />} />
               <Route path="/Account" element={<Account />} />
             </Routes>
+            {/* <Footer /> */}
           </div>
         </Router>
       </ProductsProvider>
