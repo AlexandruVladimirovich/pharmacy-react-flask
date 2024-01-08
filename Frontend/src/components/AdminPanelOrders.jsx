@@ -3,13 +3,12 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { FloatButton } from 'antd';
 
-export default function Orders() {
-  const [orders, setOrders] = useState([]);
+export default function AdminPanelOrders() {
+  const [allOrders, setAllOrders] = useState([]);
   const { authToken } = useAuth();
 
-
   const handleShowProducts = (order) => {
-    setOrders((prevOrders) => {
+    setAllOrders((prevOrders) => {
       return prevOrders.map((prevOrder) => {
         if (prevOrder.order_id === order.order_id) {
           return { ...prevOrder, showProducts: !prevOrder.showProducts };
@@ -25,38 +24,35 @@ export default function Orders() {
       headers: { Authorization: authToken }
     })
       .then(response => {
-        setOrders(response.data.map(order => ({ ...order, showProducts: false })));
-        console.log('Hello!!')
+        console.log(response.data);
+        setAllOrders(response.data.orders.map(order => ({ ...order, showProducts: false })));
       })
       .catch(error => {
         console.error(error);
       });
-  }, []);
+  }, [authToken]);
 
   return (
-    <div className='orders'>
-      <h2>Your Orders:</h2>
-      {orders.length === 0 ? (
-        <p>No orders yet.</p>
+    <div className='admin-panel-orders'>
+      <h2>All Orders:</h2>
+      {allOrders.length === 0 ? (
+        <p>No orders available.</p>
       ) : (
-        <div className='order'>
-          {orders.map(order => (
+        <div className='order-list'>
+          {allOrders.map(order => (
             <div key={order.order_id} className='order-info'>
               <h4>Order ID: {order.order_id}</h4>
-              <p>First Name: {order.first_name}</p>
-              <p>Last Name: {order.last_name}</p>
               <p>Date: {order.date}</p>
               <p>Status: {order.status}</p>
               <p>Address: {order.address}</p>
               <p>Telephone Number: {order.tel_number}</p>
-              <button onClick={() => handleShowProducts(order)}>
+              <button onClick={() => handleShowProducts(order)} className='adminPanel-button'>
                 {order.showProducts ? 'Hide Products' : 'Show Products'}
               </button>
               {order.showProducts && (
                 <div className='order-items'>
                   <h4>Products in Order:</h4>
                     {order.orderItems.map(product => (
-                      
                       <div key={product.product_id} className='order-item'>
                         <div className="product-item_img">
                           <img src={product.product_img} alt="" />

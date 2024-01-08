@@ -7,7 +7,7 @@ import Login from './pages/Login';
 import Basket from './components/Basket';
 import AdminPanel from './pages/AdminPanel';
 import AddNews from './components/AddNews';
-import Footer from './components/Footer';
+import AdminPanelOrders from './components/AdminPanelOrders';
 import { AuthProvider } from './context/AuthContext';
 import { ProductsProvider } from './context/ProductsContext';
 import Account from './pages/Account';
@@ -28,8 +28,8 @@ function App() {
               <Route path="/AdminPanel" element={<AdminPanel />} />
               <Route path='/AddNews' element={<AddNews />} />
               <Route path="/Account" element={<Account />} />
+              <Route path="/AdminPanelOrders" element={<AdminPanelOrders />} />
             </Routes>
-            {/* <Footer /> */}
           </div>
         </Router>
       </ProductsProvider>

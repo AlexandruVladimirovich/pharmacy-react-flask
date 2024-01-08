@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import basket from '../image/shopping_basket.svg';
 import logo from '../image/logo.svg';
 import { message, Menu, Dropdown } from 'antd';
 import { LogoutOutlined, UserOutlined, DownOutlined } from '@ant-design/icons';
@@ -20,7 +19,7 @@ export default function Header() {
         <Link to="/AdminPanel">Admin Panel</Link>
       </Menu.Item>
       <Menu.Item key="2">
-        <Link to="/UserOrders">User Orders</Link>
+        <Link to="/AdminPanelOrders">User Orders</Link>
       </Menu.Item>
       <Menu.Item key="3">
         <Link to="/AddNews">Add News</Link>

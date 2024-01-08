@@ -3,11 +3,12 @@ import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { message, FloatButton } from 'antd';
 
-
 export default function Basket() {
   const { authToken } = useAuth();
   const [cartItems, setCartItems] = useState([]);
-  const [totalAmount, setTotalAmout] = useState('');
+  const [totalAmount, setTotalAmount] = useState('');
+  const [address, setAddress] = useState('');
+  const [telNumber, setTelNumber] = useState('');
 
   useEffect(() => {
     fetchCartItems();
@@ -20,7 +21,7 @@ export default function Basket() {
       .then(response => {
         console.log(response.data);
         setCartItems(response.data.cart_items);
-        setTotalAmout(response.data.total_amount);
+        setTotalAmount(response.data.total_amount);
       })
       .catch(error => {
         console.error(error);
@@ -42,6 +43,35 @@ export default function Basket() {
       });
   };
 
+  const handlePlaceOrder = () => {
+    axios.post('http://127.0.0.1:5000/place_order', {
+      address,
+      telNumber,
+      cartItems,
+    }, {
+      headers: { Authorization: authToken },
+    })
+      .then(response => {
+        console.log(response.data);
+        message.success('Заказ успешно оформлен.');
+      })
+      .catch(error => {
+        console.error(error);
+        message.error('Ошибка при оформлении заказа. Проверьте консоль для деталей.');
+      });
+  };
+
+  const handleQuantityChange = (productId, newQuantity) => {
+    const updatedCartItems = cartItems.map(item => {
+      if (item.id === productId) {
+        return { ...item, quantity: newQuantity };
+      }
+      return item;
+    });
+    setCartItems(updatedCartItems);
+  };
+  
+
   return (
     <div className="basket">
       <h2 className='basket-title'>Your Shopping Basket:</h2>
@@ -50,34 +80,29 @@ export default function Basket() {
           <p>Your basket is empty :( Go to the catalog and add something.</p>
         ) : (
           <div className='basket-items'>
-            {cartItems.map(item => (
-              <div className='basket-item' key={item.id}>
-                <img src={item.img} alt="" />
-                <div className="basket-item-text">
-                  <p className='basket-item-title'>{item.name}</p>
-                  <p>Price: {item.price} lei</p>
-                  <input type="number" value={item.quantity} />
-                  <button onClick={() => handlerDelBasketItem(item.id)}>Delete</button>
-                </div>
+          {cartItems.map(item => (
+            <div className='basket-item' key={item.id}>
+              <img src={item.img} alt="" />
+              <div className="basket-item-text">
+                <p className='basket-item-title'>{item.name}</p>
+                <p>Price: {item.price} lei</p>
+                <input type="number" value={item.quantity} onChange={(e) => handleQuantityChange(item.id, e.target.value)} />
+                <button onClick={() => handlerDelBasketItem(item.id)}>Delete</button>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
+        </div>
         )}
 
         <div className="order-details">
           <form action="">
-            <input type="name" placeholder='First Name' />
-            <input type="name" placeholder='Last Name' />
-            <input type="text" placeholder='City' />
-            <input type="text" placeholder='Address' />
-            <input type="tel" placeholder='Telephone Number' />
-            <input type="text" placeholder='Promo' />
+            <input type="text" placeholder='Address' value={address} onChange={(e) => setAddress(e.target.value)} />
+            <input type="tel" placeholder='Telephone Number' value={telNumber} onChange={(e) => setTelNumber(e.target.value)} />
           </form>
-            <div className="order-details_pay">
-              <p>Total amount: {totalAmount} </p>
-              <p>Delivery price: </p>
-              <button className='order-details_btn'>Pay</button>
-            </div>
+          <div className="order-details_pay">
+            <p>Total amount: {totalAmount} </p>
+            <button className='order-details_btn' onClick={handlePlaceOrder}>Place order</button>
+          </div>
         </div>
       </div>
       <FloatButton.BackTop />

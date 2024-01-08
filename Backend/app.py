@@ -442,6 +442,149 @@ def update_product():
         print(f"Error: {e}")
         return jsonify({"error": str(e)}), 500
 
+#---------PLACE ORDER----------
+@app.route('/place_order', methods=['POST'])
+def place_order():
+    data = request.get_json()
+
+    token = request.headers.get('Authorization').encode('utf-8')
+
+    try:
+        decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+        user_id = decoded_token['user_id']
+    except jwt.ExpiredSignatureError:
+        return jsonify({"error": "Token has expired"}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({"error": "Invalid token"}), 401
+
+    address = data.get('address')
+    tel_number = data.get('telNumber')
+    cart_items = data.get('cartItems')
+    try:
+        cur = mysql.connection.cursor()
+
+        cur.execute("INSERT INTO orders (user_id, date, status, address, tel_number) VALUES (%s, NOW(), 'Pending', %s, %s)", (user_id, address, tel_number))
+
+        cur.execute("SELECT LAST_INSERT_ID()")
+        order_id = cur.fetchone()[0]
+
+        cur.execute("INSERT INTO OrderItem (order_id, product_id, quantity) SELECT %s, product_id, quantity FROM basket WHERE user_id = %s", (order_id, user_id))
+
+        cur.execute("DELETE FROM basket WHERE user_id = %s", (user_id,))
+
+        mysql.connection.commit()
+        cur.close()
+
+        return jsonify({"message": "Order placed successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# --------- GET USER ORDERS ---------
+@app.route('/get_user_orders', methods=['GET'])
+def get_user_orders():
+    token = request.headers.get('Authorization').encode('utf-8')
+
+    try:
+        decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+        user_id = decoded_token['user_id']
+        is_admin = decoded_token.get('role', 'user')
+    except jwt.ExpiredSignatureError:
+        return jsonify({"error": "Token has expired"}), 401
+    except jwt.InvalidTokenError:
+        return jsonify({"error": "Invalid token"}), 401
+
+    try:
+        cur = mysql.connection.cursor()
+        # Заказы
+        if is_admin:
+            cur.execute("""
+             SELECT 
+                    o.order_id,
+                    o.date,
+                    o.status,
+                    o.address,
+                    o.tel_number,
+                    o.user_id,
+                    u.firstName,
+                    u.lastName
+                FROM 
+                    orders o
+                JOIN
+                    users u ON o.user_id = u.id
+            """)
+        else:
+            cur.execute("""
+                SELECT 
+                    order_id,
+                    date,
+                    status,
+                    address,
+                    tel_number
+                FROM 
+                    orders
+                WHERE 
+                    user_id = %s
+            """, (user_id,))
+
+        orders_data = cur.fetchall()
+        cur.close()
+
+        orders_list = []
+
+        for order_row in orders_data:
+            order_id = order_row[0]
+            current_order = {
+                'order_id': order_id,
+                'date': order_row[1],
+                'status': order_row[2],
+                'address': order_row[3],
+                'tel_number': order_row[4],
+                'user_id': order_row[5],
+                'first_name': order_row[6],
+                'last_name': order_row[7],
+                'orderItems': [],
+            }
+            # товары
+            cur = mysql.connection.cursor()
+            cur.execute("""
+                SELECT 
+                    oi.order_item_id,
+                    oi.product_id,
+                    oi.quantity,
+                    p.name as product_name,
+                    p.img as product_img,
+                    p.price as product_price
+                FROM 
+                    OrderItem oi
+                JOIN 
+                    products p ON oi.product_id = p.id
+                WHERE 
+                    oi.order_id = %s
+            """, (order_id,))
+
+            order_items_data = cur.fetchall()
+            cur.close()
+
+            for item_row in order_items_data:
+                current_order['orderItems'].append({
+                    'order_item_id': item_row[0],
+                    'product_id': item_row[1],
+                    'quantity': item_row[2],
+                    'product_name': item_row[3],
+                    'product_img': item_row[4],
+                    'product_price': str(item_row[5]),
+                })
+
+            orders_list.append(current_order)
+            print("Sent data:", orders_list)  # Добавленный вывод данных в консоль
+
+        return jsonify({"orders": orders_list})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 
 if __name__ == '__main__':
