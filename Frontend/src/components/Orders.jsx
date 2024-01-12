@@ -25,8 +25,7 @@ export default function Orders() {
       headers: { Authorization: authToken }
     })
       .then(response => {
-        setOrders(response.data.map(order => ({ ...order, showProducts: false })));
-        console.log('Hello!!')
+        setOrders(response.data.orders.map(order => ({ ...order, showProducts: false })));
       })
       .catch(error => {
         console.error(error);

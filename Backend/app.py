@@ -259,7 +259,7 @@ def get_cart_items():
     cur = mysql.connection.cursor()
     cur.execute("""
         SELECT 
-            basket.id, 
+            products.id,
             products.name, 
             products.discription, 
             products.price, 
@@ -298,7 +298,37 @@ def get_cart_items():
 
     return jsonify(response)
 
+#--------UPDATE CART QUANTITY----------
+@app.route('/update_cart_item', methods=['POST'])
+def update_cart_item():
+    try:
+        data = request.get_json()
+        print(data)
+        token = request.headers.get('Authorization').encode('utf-8')
 
+        try:
+            decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+            user_id = decoded_token['user_id']
+        except jwt.ExpiredSignatureError:
+            return jsonify({"error": "Token has expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"error": "Invalid token"}), 401
+
+        product_id = data.get('product_id')
+        new_quantity = data.get('new_quantity')
+
+        cur = mysql.connection.cursor()
+        sql_query = "UPDATE basket SET quantity = %s WHERE user_id = %s AND product_id = %s"
+        query_data = (int(new_quantity), int(user_id), int(product_id))
+
+        cur.execute(sql_query, query_data)  
+        mysql.connection.commit()
+        cur.close()
+
+        return jsonify({"message": "Quantity updated successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 
@@ -578,7 +608,7 @@ def get_user_orders():
                 })
 
             orders_list.append(current_order)
-            print("Sent data:", orders_list)  # Добавленный вывод данных в консоль
+            print("Sent data:", orders_list)  # консоль
 
         return jsonify({"orders": orders_list})
 

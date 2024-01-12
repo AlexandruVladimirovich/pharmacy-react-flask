@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axios, { all } from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { FloatButton } from 'antd';
 
@@ -24,8 +24,8 @@ export default function AdminPanelOrders() {
       headers: { Authorization: authToken }
     })
       .then(response => {
-        console.log(response.data);
         setAllOrders(response.data.orders.map(order => ({ ...order, showProducts: false })));
+        console.log("AllOrders", allOrders)
       })
       .catch(error => {
         console.error(error);
@@ -42,6 +42,8 @@ export default function AdminPanelOrders() {
           {allOrders.map(order => (
             <div key={order.order_id} className='order-info'>
               <h4>Order ID: {order.order_id}</h4>
+              <p>Fist Name: {order.first_name}</p>
+              <p>Last Name: {order.last_name}</p>
               <p>Date: {order.date}</p>
               <p>Status: {order.status}</p>
               <p>Address: {order.address}</p>

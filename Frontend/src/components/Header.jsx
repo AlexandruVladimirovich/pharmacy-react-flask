@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import logo from '../image/logo.svg';
 import { message, Menu, Dropdown } from 'antd';
-import { LogoutOutlined, UserOutlined, DownOutlined } from '@ant-design/icons';
+import { LogoutOutlined, DownOutlined } from '@ant-design/icons';
 
 export default function Header() {
   const { authToken, onLogout, role } = useAuth();
@@ -27,6 +27,23 @@ export default function Header() {
     </Menu>
   );
 
+  const userMenu = (
+    <Menu>
+      <Menu.Item key="1">
+        <Link to="/ShoppingCart">Shoping Cart</Link>
+      </Menu.Item>
+      <Menu.Item key="2">
+        <Link to="/Orders">Orders</Link>
+      </Menu.Item>
+      <Menu.Item key="3">
+        <Link to="/Feedback">Feedback</Link>
+      </Menu.Item>
+      <Menu.Item key="4">
+        <Link to="/AccountDetails">AccountDetails</Link>
+      </Menu.Item>
+    </Menu>
+  )
+
   return (
     <header className='header'>
       <div className="logo">
@@ -43,7 +60,7 @@ export default function Header() {
             <>
               {role === 'admin' && (
                 <li>
-                  <Dropdown overlay={adminMenu}>
+                  <Dropdown overlay={adminMenu} trigger={['click']}>
                     <Link to="#" className='link nav-account'>
                       <p>Dashboard</p> <DownOutlined />
                     </Link>
@@ -51,9 +68,11 @@ export default function Header() {
                 </li>
               )}
               <li>
-                <Link className='link nav-account' to="/Account">
-                  <p>My Account</p> <UserOutlined />
-                </Link>
+              <Dropdown overlay={userMenu} trigger={['click']}>
+                    <Link to="#" className='link nav-account'>
+                      <p>Info</p> <DownOutlined />
+                    </Link>
+                  </Dropdown>
               </li>
               <li>
                 <div className='nav-account' onClick={handleLogout}>
